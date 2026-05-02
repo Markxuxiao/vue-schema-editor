@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useSchemaStore } from '../store'
 
 const rect = ref({ x: 0, y: 0, width: 0, height: 0 })
@@ -173,6 +173,17 @@ function onDragEnd(e) {
   }
 
   insertIndicator.value = { ...insertIndicator.value, visible: false }
+
+  // 拖拽完成后，等待 Vue 渲染完成再重新定位高亮框
+  if (currentId.value) {
+    nextTick(() => {
+      const el = document.querySelector(`[data-editable-id="${currentId.value}"]`)
+      if (el) {
+        const r = el.getBoundingClientRect()
+        rect.value = { x: r.left, y: r.top, width: r.width, height: r.height }
+      }
+    })
+  }
 }
 
 function startDrag(e) {

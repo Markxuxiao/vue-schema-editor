@@ -67,19 +67,19 @@ const state = reactive({
             {
               id: 'n4',
               type: 'box',
-              props: { title: '嵌套的可编辑', color: 'rgb(55, 214, 63)' },
+              props: { title: '嵌套的可编辑1', color: 'rgb(55, 214, 63)' },
               editable: true,
             },
             {
               id: 'n41',
               type: 'box',
-              props: { title: '嵌套的可编辑', color: 'rgb(55, 214, 63)' },
+              props: { title: '嵌套的可编辑2', color: 'rgb(79, 25, 84)' },
               editable: true,
             },
             {
               id: 'n42',
               type: 'box',
-              props: { title: '嵌套的可编辑', color: 'rgb(55, 214, 63)' },
+              props: { title: '嵌套的可编辑3', color: 'rgb(210, 34, 87)' },
               editable: true,
             },
           ],
