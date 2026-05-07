@@ -51,7 +51,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useSchemaStore } from '../store'
+import { useSchemaStore } from './store'
 
 const rect = ref({ x: 0, y: 0, width: 0, height: 0 })
 const visible = ref(false)

@@ -18,7 +18,7 @@
 
 <script setup>
 import { reactive, computed, watch } from 'vue'
-import { useSchemaStore } from '../store'
+import { useSchemaStore } from './store'
 
 const store = useSchemaStore()
 const editingId = computed(() => store.editingId)

@@ -18,20 +18,13 @@
 
 <script setup>
 import SchemaRenderer from './SchemaRenderer.vue'
-import BoxComponent from './BoxComponent.vue'
-import ContainerComponent from './ContainerComponent.vue'
-import InputComponent from './InputComponent.vue'
-import SelectComponent from './SelectComponent.vue'
+import { RENDERER_REGISTRY } from '../renderers/index.js'
 import { defineProps } from 'vue'
 
 const props = defineProps({ nodes: Array })
 
 function componentFor(type) {
-  if (type === 'box') return BoxComponent
-  if (type === 'container') return ContainerComponent
-  if (type === 'input') return InputComponent
-  if (type === 'select') return SelectComponent
-  return 'div'
+  return RENDERER_REGISTRY[type] ?? 'div'
 }
 </script>
 
