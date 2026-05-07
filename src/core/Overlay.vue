@@ -19,6 +19,28 @@
       :style="{ left: rect.x + rect.width - 35 + 'px', top: rect.y + 10 + 'px' }"
       @click.stop="openEditor"
     >✎</button>
+    <!-- 添加子组件按钮 -->
+    <button
+      v-if="visible && !isDragging && canAddChild"
+      class="add-btn"
+      data-editable-ignore
+      :style="{ left: rect.x + rect.width - 68 + 'px', top: rect.y + 10 + 'px' }"
+      @click.stop="togglePicker"
+    >+</button>
+    <!-- 类型选择器 -->
+    <div
+      v-if="showPicker"
+      class="type-picker"
+      data-editable-ignore
+      :style="{ left: rect.x + rect.width - 68 + 'px', top: rect.y - 8 + 'px' }"
+    >
+      <div
+        v-for="type in filteredTypes"
+        :key="type"
+        class="type-option"
+        @click.stop="addChild(type)"
+      >{{ type }}</div>
+    </div>
     <!-- 拖拽按钮 -->
     <button
       v-if="visible && !isDragging"
@@ -50,13 +72,61 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useSchemaStore } from './store'
+import { RENDERER_REGISTRY } from '../renderers/index.js'
 
 const rect = ref({ x: 0, y: 0, width: 0, height: 0 })
 const visible = ref(false)
 const currentId = ref(null)
 const store = useSchemaStore()
+
+// 添加子组件相关
+const showPicker = ref(false)
+const availableTypes = Object.keys(RENDERER_REGISTRY)
+const currentNodeType = ref(null)
+const canAddChild = ref(false)
+
+const ALLOWED_CHILDREN = {
+  table: ['table-column'],
+}
+
+const filteredTypes = computed(() => {
+  if (currentNodeType.value && ALLOWED_CHILDREN[currentNodeType.value]) {
+    return ALLOWED_CHILDREN[currentNodeType.value]
+  }
+  return availableTypes
+})
+
+function syncHighlight(id) {
+  nextTick(() => {
+    const el = document.querySelector(`[data-editable-id="${id}"]`)
+    if (el) {
+      const r = el.getBoundingClientRect()
+      rect.value = { x: r.left, y: r.top, width: r.width, height: r.height }
+    }
+  })
+}
+
+function togglePicker() {
+  showPicker.value = !showPicker.value
+}
+
+const DEFAULT_PROPS = {
+  box: { title: '新 box', color: '#9ad' },
+  container: { title: '新容器' },
+  input: { label: '新输入框', placeholder: '请输入', modelValue: '' },
+  select: { label: '新选择器', options: ['选项1', '选项2'], modelValue: '' },
+  table: { title: '新表格' },
+  'table-column': { label: '新列' },
+}
+
+function addChild(type) {
+  if (!currentId.value) return
+  store.addNode(currentId.value, type, { ...DEFAULT_PROPS[type] })
+  showPicker.value = false
+  syncHighlight(currentId.value)
+}
 
 // 拖拽相关状态
 const isDragging = ref(false)
@@ -88,8 +158,8 @@ function updatePosition(e) {
   // 如果正在拖拽，跳过普通高亮更新
   if (isDragging.value) return
 
-  // 如果鼠标在编辑/拖拽按钮上，保持当前高亮
-  if (e.target.classList && (e.target.classList.contains('edit-btn') || e.target.classList.contains('drag-btn'))) {
+  // 如果鼠标在编辑/拖拽/添加按钮或选择器上，保持当前高亮
+  if (e.target.classList && (e.target.classList.contains('edit-btn') || e.target.classList.contains('drag-btn') || e.target.classList.contains('add-btn') || e.target.classList.contains('type-option'))) {
     if (visible.value && currentId.value) return
   }
 
@@ -105,11 +175,17 @@ function updatePosition(e) {
       rect.value = { x: r.left, y: r.top, width: r.width, height: r.height }
       visible.value = true
       currentId.value = id
+      currentNodeType.value = node.type
+      canAddChild.value = !!node.children
+      showPicker.value = false
       return
     }
   }
   visible.value = false
   currentId.value = null
+  currentNodeType.value = null
+  canAddChild.value = false
+  showPicker.value = false
 }
 
 function onDragMove(e) {
@@ -176,13 +252,7 @@ function onDragEnd(e) {
 
   // 拖拽完成后，等待 Vue 渲染完成再重新定位高亮框
   if (currentId.value) {
-    nextTick(() => {
-      const el = document.querySelector(`[data-editable-id="${currentId.value}"]`)
-      if (el) {
-        const r = el.getBoundingClientRect()
-        rect.value = { x: r.left, y: r.top, width: r.width, height: r.height }
-      }
-    })
+    syncHighlight(currentId.value)
   }
 }
 
@@ -201,11 +271,18 @@ function openEditor() {
 
 onMounted(() => {
   window.addEventListener('pointermove', updatePosition)
+  window.addEventListener('scroll', onScroll, true)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('pointermove', updatePosition)
+  window.removeEventListener('scroll', onScroll, true)
 })
+
+function onScroll() {
+  if (!currentId.value) return
+  syncHighlight(currentId.value)
+}
 </script>
 
 <style>
@@ -263,5 +340,46 @@ onBeforeUnmount(() => {
   border-radius: 4px;
   pointer-events: none;
   z-index: 10001;
+}
+.add-btn {
+  position: absolute;
+  transform: translate(50%, -50%);
+  background: #42b983;
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.14);
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+}
+.type-picker {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10002;
+  pointer-events: auto;
+  min-width: 80px;
+}
+.type-option {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+}
+.type-option:hover {
+  background: #f5f5f5;
+}
+.type-option:first-child {
+  border-radius: 6px 6px 0 0;
+}
+.type-option:last-child {
+  border-radius: 0 0 6px 6px;
 }
 </style>

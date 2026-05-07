@@ -11,7 +11,7 @@ defineProps({ title: { type: String, default: 'Container' } })
 </script>
 
 <style>
-.container-comp { border:1px dashed #ccc; padding:8px; border-radius:6px }
+.container-comp { border:1px dashed #ccc; padding:8px; border-radius:6px; min-width: 160px; min-height: 80px }
 .label { font-size:12px; color:#666; margin-bottom:6px }
 .children { display:flex; gap:8px; flex-wrap:wrap }
 </style>

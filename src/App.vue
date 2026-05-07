@@ -37,7 +37,7 @@ const schema = [
         id: 'n3',
         type: 'container',
         props: { title: '嵌套容器' },
-        editable: false,
+        editable: true,
         children: [
           { id: 'n4', type: 'box', props: { title: '嵌套的可编辑1', color: 'rgb(55, 214, 63)' }, editable: true },
           { id: 'n41', type: 'box', props: { title: '嵌套的可编辑2', color: 'rgb(79, 25, 84)' }, editable: true },

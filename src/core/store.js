@@ -1,4 +1,5 @@
 import { reactive } from 'vue'
+import { v4 as uuid } from 'uuid'
 
 let state = null
 
@@ -58,6 +59,18 @@ export function useSchemaStore(initialSchema) {
         }
       }
       return true
+    },
+    addNode(parentId, type, extraProps = {}) {
+      const result = findNodeAndParent(state.schema, parentId)
+      if (!result?.node) return null
+      const children = result.node.children
+      if (!children) return null
+      const node = { id: uuid(), type, props: extraProps, editable: true }
+      if (type === 'container' || type === 'table') {
+        node.children = []
+      }
+      children.push(node)
+      return node
     },
   }
 }
