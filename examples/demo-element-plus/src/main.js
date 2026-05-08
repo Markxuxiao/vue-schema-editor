@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import 'element-plus/dist/index.css'
-import { createPinia } from 'element-plus'
+import ElementPlus from 'element-plus'
 
-createApp(App).use(createPinia()).mount('#app')
+createApp(App).use(ElementPlus).mount('#app')
