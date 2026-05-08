@@ -72,30 +72,30 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, inject, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useSchemaStore } from './store'
-import { RENDERER_REGISTRY } from '../renderers/index.js'
 
 const rect = ref({ x: 0, y: 0, width: 0, height: 0 })
 const visible = ref(false)
 const currentId = ref(null)
 const store = useSchemaStore()
 
+// 由使用方 provide
+const RENDERER_REGISTRY = inject('RENDERER_REGISTRY', {})
+const DEFAULTS = inject('DEFAULTS', {})
+const ALLOWED_CHILDREN = inject('ALLOWED_CHILDREN', {})
+
 // 添加子组件相关
 const showPicker = ref(false)
-const availableTypes = Object.keys(RENDERER_REGISTRY)
+const availableTypes = computed(() => Object.keys(RENDERER_REGISTRY))
 const currentNodeType = ref(null)
 const canAddChild = ref(false)
-
-const ALLOWED_CHILDREN = {
-  table: ['table-column'],
-}
 
 const filteredTypes = computed(() => {
   if (currentNodeType.value && ALLOWED_CHILDREN[currentNodeType.value]) {
     return ALLOWED_CHILDREN[currentNodeType.value]
   }
-  return availableTypes
+  return availableTypes.value
 })
 
 function syncHighlight(id) {
@@ -112,18 +112,9 @@ function togglePicker() {
   showPicker.value = !showPicker.value
 }
 
-const DEFAULT_PROPS = {
-  box: { title: '新 box', color: '#9ad' },
-  container: { title: '新容器' },
-  input: { label: '新输入框', placeholder: '请输入', modelValue: '' },
-  select: { label: '新选择器', options: ['选项1', '选项2'], modelValue: '' },
-  table: { title: '新表格' },
-  'table-column': { label: '新列' },
-}
-
 function addChild(type) {
   if (!currentId.value) return
-  store.addNode(currentId.value, type, { ...DEFAULT_PROPS[type] })
+  store.addNode(currentId.value, type, { ...(DEFAULTS[type] || {}) })
   showPicker.value = false
   syncHighlight(currentId.value)
 }

@@ -18,9 +18,9 @@
 
 <script setup>
 import SchemaRenderer from './SchemaRenderer.vue'
-import { RENDERER_REGISTRY } from '../renderers/index.js'
-import { defineProps } from 'vue'
+import { inject } from 'vue'
 
+const RENDERER_REGISTRY = inject('RENDERER_REGISTRY', {})
 const props = defineProps({ nodes: Array })
 
 function componentFor(type) {

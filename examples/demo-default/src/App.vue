@@ -5,18 +5,22 @@
       <SchemaRenderer :nodes="schemaData" />
     </div>
 
-    <!-- Overlay 挂载在 App 内部（也可以挂到 body） -->
     <Overlay />
     <EditorPanel />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import SchemaRenderer from './core/SchemaRenderer.vue'
-import Overlay from './core/Overlay.vue'
-import EditorPanel from './core/EditorPanel.vue'
-import { useSchemaStore } from './core/store'
+import { computed, provide } from 'vue'
+import SchemaRenderer from '@vue-schema-editor/core/SchemaRenderer.vue'
+import Overlay from '@vue-schema-editor/core/Overlay.vue'
+import EditorPanel from '@vue-schema-editor/core/EditorPanel.vue'
+import { useSchemaStore } from '@vue-schema-editor/core/store.js'
+import { RENDERER_REGISTRY, DEFAULTS, ALLOWED_CHILDREN } from '@vue-schema-editor/default-renderers'
+
+provide('RENDERER_REGISTRY', RENDERER_REGISTRY)
+provide('DEFAULTS', DEFAULTS)
+provide('ALLOWED_CHILDREN', ALLOWED_CHILDREN)
 
 const schema = [
   {
@@ -37,7 +41,7 @@ const schema = [
         id: 'n3',
         type: 'container',
         props: { title: '嵌套容器' },
-        editable: true,
+        editable: false,
         children: [
           { id: 'n4', type: 'box', props: { title: '嵌套的可编辑1', color: 'rgb(55, 214, 63)' }, editable: true },
           { id: 'n41', type: 'box', props: { title: '嵌套的可编辑2', color: 'rgb(79, 25, 84)' }, editable: true },

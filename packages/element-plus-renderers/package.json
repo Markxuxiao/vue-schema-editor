@@ -1,0 +1,13 @@
+{
+  "name": "@vue-schema-editor/element-plus-renderers",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0",
+    "element-plus": "^2.0.0"
+  }
+}
