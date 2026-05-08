@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Vue 3 schema renderer demo with drag-to-reorder and editable components. Renders a tree-based schema where each node has a type, props, and optional children.
+Vue 3 schema editor with drag-to-reorder, in-place editing, and dynamic component addition. Renders a tree-based schema where each node has a type, props, and optional children. Supports `box`, `container`, `input`, `select`, `table`, `table-column` component types.
 
 ## Commands
 
@@ -23,11 +23,14 @@ npm run preview # Preview production build
 **Node Identification** - Uses `data-editable-id` on rendered elements for hover/drag detection. `data-editable-ignore` excludes child elements (buttons, panels) from the hover highlight system.
 
 **Overlay System** (`Overlay.vue`) - Fixed-position overlay handles:
-- Hover highlighting via `pointermove` listener
+- Hover highlighting via `pointermove` listener + scroll sync
 - Edit button (opens EditorPanel)
 - Drag handle (triggers reorder via `moveNode` store action)
 - Insert indicator and drag ghost during drag operations
+- Add button with type picker; `ALLOWED_CHILDREN` restricts which types a container can accept
 
-**Store** (`core/store.js`) - `useSchemaStore(initialSchema)` accepts the schema as a parameter, making the store reusable across different pages with different schemas. Key methods: `getNode`, `updateNodeProps`, `moveNode` (handles sibling reordering via splice), `openEditor`/`closeEditor`.
+**Store** (`core/store.js`) - `useSchemaStore(initialSchema)` accepts the schema as a parameter, making the store reusable across different pages with different schemas. Key methods: `getNode`, `updateNodeProps`, `moveNode` (handles sibling reordering via splice), `addNode` (appends child with type-specific defaults), `openEditor`/`closeEditor`.
 
 **Drag-to-Reorder Logic** - `Overlay.vue` computes editable siblings, determines left/right position relative to target center, then calls `store.moveNode(id, targetId, position)`.
+
+**Type Picker Filtering** - `ALLOWED_CHILDREN` in `Overlay.vue` defines which child types each container accepts. e.g. `table` only accepts `table-column`.
